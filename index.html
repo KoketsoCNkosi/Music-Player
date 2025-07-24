@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Honor Music Player</h1>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>🎼 Music Library</h2>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search for songs, artists..." id="searchInput">
+                </div>
+                <div class="category-filter">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="pop">Pop</button>
+                    <button class="category-btn" data-category="rock">Rock</button>
+                    <button class="category-btn" data-category="jazz">Jazz</button>
+                    <button class="category-btn" data-category="electronic">Electronic</button>
+                    <button class="category-btn" data-category="classical">Classical</button>
+                </div>
+                <div class="music-list" id="musicList"></div>
+            </div>
+
+            <div class="section">
+                <h2>📋 My Playlist</h2>
+                <div class="playlist-controls">
+                    <button class="playlist-btn" onclick="shufflePlaylist()">🔀 Shuffle</button>
+                    <button class="playlist-btn" onclick="clearPlaylist()">🗑️ Clear</button>
+                    <button class="playlist-btn" onclick="savePlaylist()">💾 Save</button>
+                </div>
+                <div class="music-list" id="playlist"></div>
+            </div>
+        </div>
+
+        <div class="player">
+            <div class="now-playing">
+                <div class="track-info">
+                    <h3 id="currentTitle">Select a song to play</h3>
+                    <p id="currentArtist">No artist</p>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div class="time-display">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="previousTrack()">⏮️</button>
+                <button class="control-btn play-pause-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
+                <button class="control-btn" onclick="nextTrack()">⏭️</button>
+            </div>
+
+            <div class="volume-container">
+                <span>🔊</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span id="volumeValue">70%</span>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // Sample music data
+        const musicLibrary = [
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", category: "pop", duration: "3:20", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+            { id: 2, title: "Bohemian Rhapsody", artist: "Queen", category: "rock", duration: "5:55", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+            { id: 3, title: "Take Five", artist: "Dave Brubeck", category: "jazz", duration: "5:24", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+            { id: 4, title: "Strobe", artist: "Deadmau5", category: "electronic", duration: "10:36", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+            { id: 5, title: "Canon in D", artist: "Pachelbel", category: "classical", duration: "4:33", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+            { id: 6, title: "Shape of You", artist: "Ed Sheeran", category: "pop", duration: "3:53", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+            { id: 7, title: "Hotel California", artist: "Eagles", category: "rock", duration: "6:30", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
+            { id: 8, title: "Blue Train", artist: "John Coltrane", category: "jazz", duration: "10:40", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+            { id: 9, title: "Levels", artist: "Avicii", category: "electronic", duration: "3:18", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
+            { id: 10, title: "Spring", artist: "Vivaldi", category: "classical", duration: "10:03", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" }
+        ];
+
+        // Player state
+        let currentSong = null;
+        let isPlaying = false;
+        let currentPlaylist = [];
+        let currentIndex = 0;
+        let filteredLibrary = [...musicLibrary];
+        let isShuffled = false;
+
+        // DOM elements
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const searchInput = document.getElementById('searchInput');
+
+        // Initialize player
+        function initializePlayer() {
+            renderMusicLibrary();
+            renderPlaylist();
+            setupEventListeners();
+            audioPlayer.volume = 0.7;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Audio player events
+            audioPlayer.addEventListener('timeupdate', updateProgress);
+            audioPlayer.addEventListener('ended', nextTrack);
+            audioPlayer.addEventListener('loadedmetadata', updateDuration);
+
+            // Progress bar click
+            progressBar.addEventListener('click', seekTo);
+
+            // Volume control
+            volumeSlider.addEventListener('input', changeVolume);
+
+            // Search functionality
+            searchInput.addEventListener('input', searchMusic);
+
+            // Category filters
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', filterByCategory);
+            });
+        }
+
+        // Render music library
+        function renderMusicLibrary() {
+            const musicList = document.getElementById('musicList');
+            musicList.innerHTML = '';
+
+            filteredLibrary.forEach(song => {
+                const musicItem = document.createElement('div');
+                musicItem.className = 'music-item';
+                if (currentSong && currentSong.id === song.id) {
+                    musicItem.classList.add('playing');
+                }
+
+                musicItem.innerHTML = `
+                    <div class="music-info">
+                        <div class="music-title">${song.title}</div>
+                        <div class="music-artist">${song.artist}</div>
+                        <div class="music-duration">${song.duration}</div>
+                    </div>
+                    <button class="add-to-playlist" onclick="addToPlaylist(${song.id})">+ Add</button>
+                `;
+
+                musicItem.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('add-to-playlist')) {
+                        playSong(song);
+                    }
+                });
+
+                musicList.appendChild(musicItem);
+            });
+        }
+
+        // Render playlist
+        function renderPlaylist() {
+            const playlist = document.getElementById('playlist');
+            playlist.innerHTML = '';
+
+            if (currentPlaylist.length === 0) {
+                playlist.innerHTML = '<div style="text-align: center; opacity: 0.7; padding: 20px;">Your playlist is empty</div>';
+                return;
+            }
+
+            currentPlaylist.forEach((song, index) => {
+                const playlistItem = document.createElement('div');
+                playlistItem.className = 'playlist-item';
+                if (currentSong && currentSong.id === song.id) {
+                    playlistItem.classList.add('playing');
+                }
+
+                playlistItem.innerHTML = `
+                    <div class="music-info">
+                        <div class="music-title">${song.title}</div>
+                        <div class="music-artist">${song.artist}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromPlaylist(${index})">×</button>
+                `;
+
+                playlistItem.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('remove-btn')) {
+                        playFromPlaylist(index);
+                    }
+                });
+
+                playlist.appendChild(playlistItem);
+            });
+        }
+
+        // Play song
+        function playSong(song) {
+            currentSong = song;
+            audioPlayer.src = song.url;
+            audioPlayer.play();
+            isPlaying = true;
+            updatePlayerUI();
+            renderMusicLibrary();
+            renderPlaylist();
+        }
+
+        // Play from playlist
+        function playFromPlaylist(index) {
+            currentIndex = index;
+            playSong(currentPlaylist[index]);
+        }
+
+        // Add to playlist
+        function addToPlaylist(songId) {
+            const song = musicLibrary.find(s => s.id === songId);
+            if (song && !currentPlaylist.find(s => s.id === songId)) {
+                currentPlaylist.push(song);
+                renderPlaylist();
+            }
+        }
+
+        // Remove from playlist
+        function removeFromPlaylist(index) {
+            currentPlaylist.splice(index, 1);
+            if (currentIndex >= index && currentIndex > 0) {
+                currentIndex--;
+            }
+            renderPlaylist();
+        }
+
+        // Clear playlist
+        function clearPlaylist() {
+            currentPlaylist = [];
+            currentIndex = 0;
+            renderPlaylist();
+        }
+
+        // Shuffle playlist
+        function shufflePlaylist() {
+            if (currentPlaylist.length > 1) {
+                const currentSongId = currentSong ? currentSong.id : null;
+                
+                // Fisher-Yates shuffle
+                for (let i = currentPlaylist.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [currentPlaylist[i], currentPlaylist[j]] = [currentPlaylist[j], currentPlaylist[i]];
+                }
+
+                // Find new index of current song
+                if (currentSongId) {
+                    currentIndex = currentPlaylist.findIndex(song => song.id === currentSongId);
+                }
+
+                renderPlaylist();
+                isShuffled = true;
+            }
+        }
+
+        // Save playlist (simulated)
+        function savePlaylist() {
+            if (currentPlaylist.length > 0) {
+                const playlistData = JSON.stringify(currentPlaylist);
+                // In a real app, you'd save to a database
+                alert(`Playlist saved! (${currentPlaylist.length} songs)`);
+            }
+        }
+
+        // Toggle play/pause
+        function togglePlayPause() {
+            if (!currentSong) return;
+
+            if (isPlaying) {
+                audioPlayer.pause();
+                isPlaying = false;
+            } else {
+                audioPlayer.play();
+                isPlaying = true;
+            }
+            updatePlayerUI();
+        }
+
+        // Next track
+        function nextTrack() {
+            if (currentPlaylist.length === 0) return;
+
+            currentIndex = (currentIndex + 1) % currentPlaylist.length;
+            playSong(currentPlaylist[currentIndex]);
+        }
+
+        // Previous track
+        function previousTrack() {
+            if (currentPlaylist.length === 0) return;
+
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : currentPlaylist.length - 1;
+            playSong(currentPlaylist[currentIndex]);
+        }
+
+        // Update player UI
+        function updatePlayerUI() {
+            if (currentSong) {
+                document.getElementById('currentTitle').textContent = currentSong.title;
+                document.getElementById('currentArtist').textContent = currentSong.artist;
+            }
+
+            playPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
+        }
+
+        // Update progress
+        function updateProgress() {
+            if (audioPlayer.duration) {
+                const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progress.style.width = `${progressPercent}%`;
+                currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            }
+        }
+
+        // Update duration
+        function updateDuration() {
+            if (audioPlayer.duration) {
+                durationEl.textContent = formatTime(audioPlayer.duration);
+            }
+        }
+
+        // Seek to position
+        function seekTo(e) {
+            if (audioPlayer.duration) {
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audioPlayer.currentTime = percent * audioPlayer.duration;
+            }
+        }
+
+        // Change volume
+        function changeVolume() {
+            const volume = volumeSlider.value / 100;
+            audioPlayer.volume = volume;
+            volumeValue.textContent = `${volumeSlider.value}%`;
+        }
+
+        // Search music
+        function searchMusic() {
+            const query = searchInput.value.toLowerCase();
+            filteredLibrary = musicLibrary.filter(song => 
+                song.title.toLowerCase().includes(query) || 
+                song.artist.toLowerCase().includes(query)
+            );
+            renderMusicLibrary();
+        }
+
+        // Filter by category
+        function filterByCategory(e) {
+            const category = e.target.dataset.category;
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+
+            // Filter library
+            if (category === 'all') {
+                filteredLibrary = [...musicLibrary];
+            } else {
+                filteredLibrary = musicLibrary.filter(song => song.category === category);
+            }
+
+            // Apply search filter if active
+            const query = searchInput.value.toLowerCase();
+            if (query) {
+                filteredLibrary = filteredLibrary.filter(song => 
+                    song.title.toLowerCase().includes(query) || 
+                    song.artist.toLowerCase().includes(query)
+                );
+            }
+
+            renderMusicLibrary();
+        }
+
+        // Format time
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Initialize the player when page loads
+        document.addEventListener('DOMContentLoaded', initializePlayer);
+    </script>
+</body>
+</html>
