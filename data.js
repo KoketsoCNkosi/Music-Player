@@ -1,4 +1,3 @@
-// Music Library Data
 const musicLibrary = [
     { 
         id: 1, 
