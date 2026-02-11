@@ -1,4 +1,3 @@
-// Main Application Class
 class MusicApp {
     constructor() {
         this.player = null;
