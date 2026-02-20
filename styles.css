@@ -595,3 +595,24 @@ body::after {
   #playBtn { width: 34px; height: 34px; }
   #playIcon svg { width: 14px; height: 14px; }
 }
+
+/* ── DISC LOADING STATE ── */
+#discArt.loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 8px;
+  background: var(--bg4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+#discArt.loading::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  z-index: 3;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
