@@ -1,194 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Modern music player with playlist management and audio visualization">
-    <meta name="theme-color" content="#ff4d4d">
-    <title>Music Player - Modern Audio Experience</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PayRaud — Music</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <span class="theme-icon sun">☀️</span>
-        <span class="theme-icon moon">🌙</span>
-    </button>
+<div class="app">
 
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1 data-aos="fade-down">
-                <span class="music-icon">🎵</span>
-                PayRaud Music Player
-            </h1>
-            <p class="subtitle" data-aos="fade-down" data-aos-delay="100">
-                Your personal music experience
-            </p>
-        </header>
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">PayRaud <span>Music</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="library">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-9 12V8l6 3-6 3zM4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6z"/></svg>
+        Library
+      </button>
+      <button class="nav-item" data-view="queue">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        Queue
+        <span class="nav-badge" id="queueCount"></span>
+      </button>
+      <button class="nav-item" data-view="search">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        Search
+      </button>
+    </nav>
 
-        <!-- Main Content Grid -->
-        <div class="main-content">
-            <!-- Music Library Section -->
-            <section class="section library-section" data-aos="fade-right">
-                <div class="section-header">
-                    <h2>🎼 Music Library</h2>
-                    <span class="song-count" id="songCount">0 songs</span>
-                </div>
-                
-                <div class="search-container">
-                    <div class="search-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input 
-                            type="text" 
-                            class="search-input" 
-                            placeholder="Search for songs, artists..." 
-                            id="searchInput"
-                            aria-label="Search music library"
-                        >
-                        <button class="clear-search" id="clearSearch" aria-label="Clear search">×</button>
-                    </div>
-                </div>
-                
-                <div class="category-filter" role="tablist" aria-label="Music categories">
-                    <button class="category-btn active" data-category="all" role="tab">All</button>
-                    <button class="category-btn" data-category="pop" role="tab">Pop</button>
-                    <button class="category-btn" data-category="rock" role="tab">Rock</button>
-                    <button class="category-btn" data-category="jazz" role="tab">Jazz</button>
-                    <button class="category-btn" data-category="electronic" role="tab">Electronic</button>
-                    <button class="category-btn" data-category="classical" role="tab">Classical</button>
-                </div>
-                
-                <div class="music-list" id="musicList" role="list">
-                    <!-- Dynamically populated -->
-                </div>
-            </section>
+    <div class="nav-section">Genres</div>
+    <div class="genre-list">
+      <button class="genre-pill active" data-genre="all">All</button>
+      <button class="genre-pill" data-genre="rap">Rap</button>
+      <button class="genre-pill" data-genre="trap">Trap</button>
+      <button class="genre-pill" data-genre="rnb">R&amp;B</button>
+    </div>
+  </aside>
 
-            <!-- Playlist Section -->
-            <section class="section playlist-section" data-aos="fade-left">
-                <div class="section-header">
-                    <h2>📋 My Playlist</h2>
-                    <span class="playlist-count" id="playlistCount">0 songs</span>
-                </div>
-                
-                <div class="playlist-controls">
-                    <button class="playlist-btn" id="shuffleBtn" title="Shuffle playlist">
-                        <span class="btn-icon">🔀</span>
-                        <span>Shuffle</span>
-                    </button>
-                    <button class="playlist-btn" id="repeatBtn" title="Toggle repeat">
-                        <span class="btn-icon">🔁</span>
-                        <span>Repeat</span>
-                    </button>
-                    <button class="playlist-btn" id="clearBtn" title="Clear playlist">
-                        <span class="btn-icon">🗑️</span>
-                        <span>Clear</span>
-                    </button>
-                    <button class="playlist-btn" id="saveBtn" title="Save playlist">
-                        <span class="btn-icon">💾</span>
-                        <span>Save</span>
-                    </button>
-                </div>
-                
-                <div class="music-list" id="playlist" role="list">
-                    <!-- Dynamically populated -->
-                </div>
-            </section>
-        </div>
-
-        <!-- Player Section -->
-        <section class="player" data-aos="fade-up">
-            <!-- Album Art Placeholder -->
-            <div class="album-art-container">
-                <div class="album-art" id="albumArt">
-                    <div class="vinyl-record" id="vinylRecord">
-                        <div class="vinyl-center"></div>
-                    </div>
-                </div>
-                <div class="audio-visualizer" id="audioVisualizer">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                </div>
-            </div>
-
-            <!-- Now Playing Info -->
-            <div class="now-playing">
-                <div class="track-info">
-                    <h3 id="currentTitle">Select a song to play</h3>
-                    <p id="currentArtist">No artist</p>
-                    <span class="track-category" id="trackCategory"></span>
-                </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar" role="slider" aria-label="Seek track" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                    <div class="progress" id="progress"></div>
-                    <div class="progress-handle" id="progressHandle"></div>
-                </div>
-                <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="duration">0:00</span>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="controls">
-                <button class="control-btn" id="prevBtn" aria-label="Previous track" title="Previous (Shift + ←)">
-                    <span class="btn-icon">⏮️</span>
-                </button>
-                <button class="control-btn play-pause-btn" id="playPauseBtn" aria-label="Play" title="Play/Pause (Space)">
-                    <span class="btn-icon">▶️</span>
-                </button>
-                <button class="control-btn" id="nextBtn" aria-label="Next track" title="Next (Shift + →)">
-                    <span class="btn-icon">⏭️</span>
-                </button>
-            </div>
-
-            <!-- Volume & Additional Controls -->
-            <div class="bottom-controls">
-                <div class="volume-container">
-                    <button class="volume-icon-btn" id="muteBtn" aria-label="Mute">
-                        <span id="volumeIcon">🔊</span>
-                    </button>
-                    <input 
-                        type="range" 
-                        class="volume-slider" 
-                        id="volumeSlider" 
-                        min="0" 
-                        max="100" 
-                        value="70"
-                        aria-label="Volume control"
-                    >
-                    <span class="volume-value" id="volumeValue">70%</span>
-                </div>
-                <div class="speed-control">
-                    <label for="speedControl">Speed:</label>
-                    <select id="speedControl" aria-label="Playback speed">
-                        <option value="0.5">0.5x</option>
-                        <option value="0.75">0.75x</option>
-                        <option value="1" selected>1x</option>
-                        <option value="1.25">1.25x</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2">2x</option>
-                    </select>
-                </div>
-            </div>
-        </section>
+  <!-- ── MAIN ── -->
+  <main class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">Library</div>
+        <div class="topbar-sub" id="topbarSub">23 tracks</div>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="Artists, songs, albums…"/>
+      </div>
     </div>
 
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+    <!-- PANELS -->
+    <div class="panels">
 
-    <!-- Audio Element -->
-    <audio id="audioPlayer"></audio>
+      <!-- LIBRARY -->
+      <div class="view-panel active" id="view-library">
+        <div class="table-header">
+          <div class="th">#</div>
+          <div class="th"></div>
+          <div class="th">Title</div>
+          <div class="th hide-mobile">Album</div>
+          <div class="th hide-mobile">Year</div>
+          <div class="th"></div>
+          <div class="th right">Time</div>
+        </div>
+        <div id="songList"></div>
+      </div>
 
-    <!-- Scripts -->
-    <script src="data.js"></script>
-    <script src="player.js"></script>
-    <script src="app.js"></script>
+      <!-- QUEUE -->
+      <div class="view-panel" id="view-queue">
+        <div class="queue-header">
+          <div class="queue-title">Next Up</div>
+          <button class="ctl-btn" id="shuffleQueueBtn" title="Shuffle queue">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+          </button>
+          <button class="ctl-btn" id="clearQueueBtn" title="Clear queue">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </div>
+        <div id="queueList"></div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="view-panel" id="view-search">
+        <div class="table-header">
+          <div class="th">#</div>
+          <div class="th"></div>
+          <div class="th">Title</div>
+          <div class="th hide-mobile">Album</div>
+          <div class="th hide-mobile">Year</div>
+          <div class="th"></div>
+          <div class="th right">Time</div>
+        </div>
+        <div id="searchResults"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── PLAYER BAR ── -->
+  <footer class="player-bar">
+
+    <!-- Now playing -->
+    <div class="np-section">
+      <div class="disc-wrap">
+        <div id="discArt">
+          <div class="disc-label"></div>
+        </div>
+      </div>
+      <div class="np-info">
+        <div id="npTitle">—</div>
+        <div id="npArtist">Select a track</div>
+      </div>
+      <button id="likeBtn">♡</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-section">
+      <div class="ctl-row">
+        <button class="ctl-btn" id="shuffleBtn" title="Shuffle (S)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+        </button>
+        <button class="ctl-btn" id="prevBtn" title="Previous (Shift+←)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button id="playBtn">
+          <span id="playIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </button>
+        <button class="ctl-btn" id="nextBtn" title="Next (Shift+→)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm2.5-6 5.5 3.9V8.1L8.5 12zM16 6h2v12h-2z"/></svg>
+        </button>
+        <button class="ctl-btn" id="repeatBtn" title="Repeat (R)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+        </button>
+      </div>
+      <div class="seek-row">
+        <span class="time-label" id="currentTime">0:00</span>
+        <div id="seekBar">
+          <div id="seekFill"></div>
+          <div id="seekDot"></div>
+        </div>
+        <span class="time-label" id="totalTime">0:00</span>
+      </div>
+    </div>
+
+    <!-- Volume -->
+    <div class="right-section">
+      <div class="vol-wrap">
+        <button id="volIcon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+        <input type="range" id="volSlider" min="0" max="100" value="80"/>
+      </div>
+    </div>
+
+  </footer>
+</div>
+
+<div id="toastContainer"></div>
+<audio id="audioEl"></audio>
+
+<script src="data.js"></script>
+<script src="player.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
